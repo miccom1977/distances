@@ -4,12 +4,12 @@
 	<meta charset="utf-8" />
 	<title>Kalkulator</title>
 	<script src="jquery.js"></script>
-	</head>
-  <body>
+</head>
+<body>
 	<div id="tresc">
-			<h1>Kalkulator cen usług zespołu muzycznego</h1><br><br>
-			Aby obliczyć cenę oferowanych przez nas usług należy wypełnić poniższy formularz.<br>
-			Wygenerowana cena nie jest ograniczona datą ślubu i wesela!<br><br>
+		<h1>Kalkulator cen usług zespołu muzycznego</h1><br><br>
+		Aby obliczyć cenę oferowanych przez nas usług należy wypełnić poniższy formularz.<br>
+		Wygenerowana cena nie jest ograniczona datą ślubu i wesela!<br><br>
 		<div id="right-panel">
 			<div id="inputs">
 				<form action="" onsubmit="initMap(); return false;">
@@ -21,137 +21,127 @@
 					<input type="submit" value="Oblicz cenę" /> <br><br> 
 				</form>
 			</div>
-			<div>
-				<strong id="stronger">Wpisz adres sali weselnej</strong>
-			</div>
-			<div id="output"></div>
-		</div>
-		<div id="map"></div>
+		<div>
+		<strong id="stronger">Wpisz adres sali weselnej</strong>
 	</div>
-    <script>
-	function initMap() {
-        var bounds = new google.maps.LatLngBounds;
-        var markersArray = [];
-        var origin = 'Główna 31, Tychy';
-		if(document.getElementById("adres").value == ''){
-			var destination = 'Główna 31, Tychy';
-			alert('musisz podać adres docelowy');
-		}else{
-			var destination = document.getElementById("adres").value;
-		};
-        var destinationIcon = 'https://www.google.com/intl/en_ALL/mapfiles/dd-end.png';
-		var destinationTitle = 'A tutaj się zatrzymujemy!';
-        var originIcon = 'https://www.google.com/intl/en_ALL/mapfiles/dd-start.png';
-		var originTitle = 'Stąd wyruszamy :)';
-		$('#map').css('width','400px').css('height', '400px');
-        var map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: 50.108138, lng: 19.0400068},
-          zoom: 12
-        });
-        var geocoder = new google.maps.Geocoder;
-        var service = new google.maps.DistanceMatrixService;
-        service.getDistanceMatrix({
-          origins: [origin],
-          destinations: [destination],
-          travelMode: google.maps.TravelMode.DRIVING,
-          unitSystem: google.maps.UnitSystem.METRIC,
-          avoidHighways: true,
-          avoidTolls: true
-        }, function(response, status) {
-          if (status !== google.maps.DistanceMatrixStatus.OK) {
-            alert('Error was: ' + status);
-          } else {
-            var originList = response.originAddresses;
-            var destinationList = response.destinationAddresses;
-            var outputDiv = document.getElementById('output');
-            outputDiv.innerHTML = '';
-            deleteMarkers(markersArray);
+	<div id="output"></div>
+	<div id="map"></div>
+<script>
+function initMap() {
+	var bounds = new google.maps.LatLngBounds;
+	var markersArray = [];
+	var origin = 'Główna 31, Tychy';
+	if(document.getElementById("adres").value == ''){
+		var destination = 'Główna 31, Tychy';
+		alert('musisz podać adres docelowy');
+	}else{
+		var destination = document.getElementById("adres").value;
+	};
+	var destinationIcon = 'https://www.google.com/intl/en_ALL/mapfiles/dd-end.png';
+	var destinationTitle = 'A tutaj się zatrzymujemy!';
+	var originIcon = 'https://www.google.com/intl/en_ALL/mapfiles/dd-start.png';
+	var originTitle = 'Stąd wyruszamy :)';
+	$('#map').css('width','400px').css('height', '400px');
+	var map = new google.maps.Map(document.getElementById('map'), {
+		center: {lat: 50.108138, lng: 19.0400068},
+		zoom: 12
+	});
+	var geocoder = new google.maps.Geocoder;
+	var service = new google.maps.DistanceMatrixService;
+	service.getDistanceMatrix({
+		origins: [origin],
+		destinations: [destination],
+		travelMode: google.maps.TravelMode.DRIVING,
+		unitSystem: google.maps.UnitSystem.METRIC,
+		avoidHighways: true,
+		avoidTolls: true
+	}, function(response, status) {
+		if (status !== google.maps.DistanceMatrixStatus.OK) {
+			alert('Error was: ' + status);
+		} else {
+			var originList = response.originAddresses;
+			var destinationList = response.destinationAddresses;
+			var outputDiv = document.getElementById('output');
+			outputDiv.innerHTML = '';
+			deleteMarkers(markersArray);
 
-            var showGeocodedAddressOnMap = function(asDestination) {
-              var icon = asDestination ? destinationIcon : originIcon;
-			   var title = asDestination ? destinationTitle : originTitle;
-              return function(results, status) {
-                if (status === google.maps.GeocoderStatus.OK) {
-                  map.fitBounds(bounds.extend(results[0].geometry.location));
-                  markersArray.push(new google.maps.Marker({
-                    map: map,
-                    position: results[0].geometry.location,
-                    icon: icon,
-					title : title
-					
-                  }));
-                } else {
-					if( status === 'ZERO_RESULTS' && document.getElementById("adres").value!= '' ){
-						alert('Geolokalizator nie potrafi odnaleźć wpisanej miejscowości :( <br> Wpisz poprawną miejscowość');
-					}
-                }
-              };
-            };
-
-            for (var i = 0; i < originList.length; i++) {
-              var results = response.rows[i].elements;
-              geocoder.geocode({'address': originList[i]},
-                  showGeocodedAddressOnMap(false));
-              for (var j = 0; j < results.length; j++) {
-                geocoder.geocode({'address': destinationList[j]},
-                    showGeocodedAddressOnMap(true));
-					var dni = document.getElementById("dni").value;
-					var koszt = 0;
-					var dystans = (results[j].distance.value/1000).toFixed(1);
-					if( dni == 1){
-						kosztImprezy = 6000;
-					}else{
-						kosztImprezy = 8000;
-					}
-					
-					if( dystans < 50 )
-					{
-						koszt = kosztImprezy;
-					}
-					else
-					{
-						if( dystans >= 50 && dystans < 100 )
-						{
-							koszt = (dystans*1.2) + kosztImprezy;
-						}
-						else if( dystans >= 100 && dystans < 400 )
-						{
-							koszt = ( ( dystans * 1.2 ) + 100 ) + kosztImprezy;
-						}
-						else if( dystans >= 400 && dystans < 600 )
-						{
-							koszt = ( dystans * 1.4 ) + kosztImprezy;
-						}
-						else if( dystans >= 600 && dystans < 800 )
-						{
-							koszt = ( dystans * 1.6 ) + kosztImprezy;
-						}
-						else
-						{
-							koszt = ( dystans * 1.9 ) + kosztImprezy;
-						}
-					}
-				
-				if( dystans > 1 ){
-					outputDiv.innerHTML += 'Musimy dojechać do sali przyjęć ' + results[j].distance.text+', cena z dojazdem to <strong>'+((Math.round((koszt)/100))*100)+'</strong> złotych brutto';
-					$('#stronger').remove();
-				}
-			}
-            }
-          }
-        });
-	}
-
-	function deleteMarkers(markersArray) {
-		for (var i = 0; i < markersArray.length; i++) {
-			markersArray[i].setMap(null);
+			var showGeocodedAddressOnMap = function(asDestination) {
+			var icon = asDestination ? destinationIcon : originIcon;
+			var title = asDestination ? destinationTitle : originTitle;
+			return function(results, status) {
+			if (status === google.maps.GeocoderStatus.OK) {
+				map.fitBounds(bounds.extend(results[0].geometry.location));
+			markersArray.push(new google.maps.Marker({
+				map: map,
+				position: results[0].geometry.location,
+				icon: icon,
+				title : title
+			})
+	 	);
+	} else {
+		if( status === 'ZERO_RESULTS' && document.getElementById("adres").value!= '' ){
+			alert('Geolokalizator nie potrafi odnaleźć wpisanej miejscowości :( <br> Wpisz poprawną miejscowość');
 		}
-		markersArray = [];
 	}
-    </script>
-    <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"
-  type="text/javascript"></script>
-    </script>
-  </body>
+};
+};
+
+for (var i = 0; i < originList.length; i++) {
+	var results = response.rows[i].elements;
+	geocoder.geocode({'address': originList[i]},
+	showGeocodedAddressOnMap(false));
+for (var j = 0; j < results.length; j++) {
+	geocoder.geocode({'address': destinationList[j]},
+	showGeocodedAddressOnMap(true));
+var dni = document.getElementById("dni").value;
+var koszt = 0;
+var dystans = (results[j].distance.value/1000).toFixed(1);
+if( dni == 1){
+	kosztImprezy = 6000;
+}else{
+	kosztImprezy = 8000;
+}
+
+if( dystans < 50 )
+{
+	koszt = kosztImprezy;
+}
+else
+{
+	if( dystans >= 50 && dystans < 100 )
+	{
+		koszt = (dystans*1.2) + kosztImprezy;
+	}else if( dystans >= 100 && dystans < 400 ){
+		koszt = ( ( dystans * 1.2 ) + 100 ) + kosztImprezy;
+	}else if( dystans >= 400 && dystans < 600 ){
+		koszt = ( dystans * 1.4 ) + kosztImprezy;
+	}else if( dystans >= 600 && dystans < 800 ){
+		koszt = ( dystans * 1.6 ) + kosztImprezy;
+	}else{
+		koszt = ( dystans * 1.9 ) + kosztImprezy;
+	}
+}
+
+	if( dystans > 1 ){
+		outputDiv.innerHTML += 'Musimy dojechać do sali przyjęć ' + results[j].distance.text+', cena z dojazdem to <strong>'+((Math.round((koszt)/100))*100)+'</strong> złotych brutto';
+		$('#stronger').remove();
+	}
+}
+}
+}
+});
+}
+
+function deleteMarkers(markersArray) {
+for (var i = 0; i < markersArray.length; i++) {
+markersArray[i].setMap(null);
+}
+markersArray = [];
+}
+</script>
+<script async defer
+src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"
+type="text/javascript"></script>
+</script>
+</body>
 </html>
